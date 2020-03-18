@@ -12,7 +12,8 @@ interface WeatherAPI {
     @GET ("$API_KEY/{coordinates}")
     fun getWeatherData(
         @Path("coordinates") coordinates: String,
-        @Query("lang") language: String
+        @Query("lang") language: String,
+        @Query("units") units: String
     ): Single<WeatherDataResult>
 
 }

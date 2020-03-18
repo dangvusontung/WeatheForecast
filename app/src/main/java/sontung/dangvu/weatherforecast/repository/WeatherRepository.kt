@@ -28,13 +28,14 @@ class WeatherRepository @Inject constructor(
         val longitude = location!!.longitude
         val queryCoordinate = "$latitude,$longitude"
         disposable.add(
-            weatherAPI.getWeatherData(queryCoordinate, "vi")
+            weatherAPI.getWeatherData(queryCoordinate, "vi", "si")
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeWith(object : DisposableSingleObserver<WeatherDataResult>(){
                     override fun onSuccess(t: WeatherDataResult) {
                         Log.d(TAG, "Success")
                         Log.d(TAG, "$t")
+//                        t.currently.convertFtoC()
                         weatherDataDetail.value = t.currently
                         weatherDataResult.value = t
                     }

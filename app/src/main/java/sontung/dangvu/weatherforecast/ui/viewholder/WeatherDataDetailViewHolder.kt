@@ -12,5 +12,4 @@ class WeatherDataDetailViewHolder(itemView : View) : RecyclerView.ViewHolder(ite
     val icon: ImageView = itemView.findViewById(R.id.icon)
     val summary: TextView = itemView.findViewById(R.id.summary)
     val temperature: TextView = itemView.findViewById(R.id.temperature)
-    val apparentlyTemperature: TextView = itemView.findViewById(R.id.apparentTemperature)
 }

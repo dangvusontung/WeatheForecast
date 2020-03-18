@@ -12,10 +12,13 @@ class WeatherDataResult(
     @SerializedName("currently")
     val currently : WeatherDataDetail,
     @SerializedName("hourly")
-    val hourly : HourlyWeatherData
+    val hourly: HourlyWeatherData,
+    @SerializedName("daily")
+    val dailyWeatherData: DailyWeatherData
 
 ) {
+
     override fun toString(): String {
-        return "WeatherDataResult(latitude='$latitude', \nlongitude='$longitude', \ntimezone='$timezone', \ncurrently=$currently, \nhourly=$hourly)\n"
+        return "WeatherDataResult(latitude='$latitude', longitude='$longitude', timezone='$timezone', currently=$currently, hourly=$hourly, dailyWeatherData=$dailyWeatherData)"
     }
 }

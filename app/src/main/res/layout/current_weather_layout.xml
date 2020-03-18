@@ -10,22 +10,41 @@
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:text="Hello"
-        android:textSize="20sp" />
+        android:layout_marginBottom="5dp"
+        android:textSize="25sp" />
 
     <TextView
+        android:layout_centerHorizontal="true"
         android:id="@+id/weather_summary_textview"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/weather_location_textView"
-        android:layout_centerHorizontal="true"
-        android:text="summary" />
+        android:textSize="20sp" />
 
     <ImageView
+        android:id="@+id/current_weather_icon"
         android:layout_width="100dp"
         android:layout_height="100dp"
+        android:layout_margin="5dp"
         android:layout_below="@id/weather_summary_textview"
         android:layout_centerHorizontal="true" />
+
+    <TextView
+        android:id="@+id/current_weather_temperature"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/current_weather_icon"
+        android:layout_centerHorizontal="true"
+        android:textSize="15sp" />
+
+    <TextView
+        android:id="@+id/current_apparent_temperature"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/current_weather_temperature"
+        android:layout_centerHorizontal="true"
+        android:layout_margin="5dp"
+        android:textSize="15sp" />
 
 
 </RelativeLayout>
