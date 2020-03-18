@@ -25,7 +25,18 @@ class LocationUtils() {
             if(address.size != 0) {
                 return address[0].adminArea
             }
-            return ""
+            return "Unknown Location"
+        }
+
+        fun getCityName(location: Location, context: Context): String {
+            val geoCoder = Geocoder(context)
+            val latitude = location.latitude
+            val longitude = location.longitude
+            val address = geoCoder.getFromLocation(latitude, longitude, 1)
+            if (address.size != 0) {
+                return address[0].adminArea
+            }
+            return "Unknown Location"
         }
     }
 }

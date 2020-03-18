@@ -20,6 +20,7 @@ class WeatherRepository @Inject constructor(
 ) {
 
     val weatherDataDetail = MutableLiveData<WeatherDataDetail>()
+    val weatherDataResult = MutableLiveData<WeatherDataResult>()
 
     fun getDataFromApi() {
         Log.d(TAG, "getDataFromApi")
@@ -27,7 +28,7 @@ class WeatherRepository @Inject constructor(
         val longitude = location!!.longitude
         val queryCoordinate = "$latitude,$longitude"
         disposable.add(
-            weatherAPI.getWeatherData(queryCoordinate)
+            weatherAPI.getWeatherData(queryCoordinate, "vi")
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeWith(object : DisposableSingleObserver<WeatherDataResult>(){
@@ -35,6 +36,7 @@ class WeatherRepository @Inject constructor(
                         Log.d(TAG, "Success")
                         Log.d(TAG, "$t")
                         weatherDataDetail.value = t.currently
+                        weatherDataResult.value = t
                     }
 
                     override fun onError(e: Throwable) {
