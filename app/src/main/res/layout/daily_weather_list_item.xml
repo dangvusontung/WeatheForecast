@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout
-
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -28,11 +27,13 @@
         android:textSize="20sp" />
 
     <TextView
+        android:textAlignment="textEnd"
         android:id="@+id/daily_low_temperature"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
+        android:layout_alignBottom="@id/daily_high_temperature"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:layout_centerVertical="true"
         android:layout_alignParentEnd="true"
-        android:textSize="20sp" />
-
+        android:textSize="15sp" />
 
 </RelativeLayout>

@@ -15,8 +15,8 @@ class LocationUtils() {
                 return locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
             } catch (e : SecurityException) {
                 e.printStackTrace()
+                return locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
             }
-            return null
         }
 
         fun getCityName(latitude : Double, longitude : Double, context: Context) : String{
@@ -33,10 +33,16 @@ class LocationUtils() {
             val latitude = location.latitude
             val longitude = location.longitude
             val address = geoCoder.getFromLocation(latitude, longitude, 1)
-            if (address.size != 0) {
-                return address[0].adminArea
+//            if (address.size != 0) {
+//                return address[0].adminArea
+//            }
+//            return "Unknown Location"
+
+            return try {
+                address[0].adminArea
+            } catch (e : IllegalStateException) {
+                "Unknown Location"
             }
-            return "Unknown Location"
         }
     }
 }

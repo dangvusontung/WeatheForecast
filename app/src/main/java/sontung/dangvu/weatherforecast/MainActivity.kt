@@ -12,6 +12,7 @@ import androidx.core.app.ActivityCompat
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import kotlinx.android.synthetic.main.activity_main.*
 import sontung.dangvu.weatherforecast.di.*
 import sontung.dangvu.weatherforecast.model.weather.WeatherDataDetail
 import sontung.dangvu.weatherforecast.retrofit.ApiUtils
@@ -24,6 +25,7 @@ import javax.inject.Inject
 import kotlin.math.roundToInt
 
 private const val TAG = "MainActivity"
+
 class MainActivity : AppCompatActivity() {
 
     private lateinit var weatherAPI: WeatherAPI
@@ -31,7 +33,7 @@ class MainActivity : AppCompatActivity() {
     @Inject
     lateinit var weatherViewModel: WeatherDataViewModel
 
-    private var location : Location? = null
+    private var location: Location? = null
 
 
     private lateinit var recyclerView: RecyclerView
@@ -51,7 +53,9 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        if(checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED){
+        if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+            && checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED
+        ) {
             requestPermission()
         }
 
@@ -69,37 +73,57 @@ class MainActivity : AppCompatActivity() {
         component.inject(this)
         //weatherViewModel = component.provideWeatherDataViewModel()
 
-        weatherViewModel.weatherDetail.observe(this, Observer<WeatherDataDetail>{
+        weatherViewModel.weatherDetail.observe(this, Observer<WeatherDataDetail> {
             Log.d(TAG, "changed")
             cityName.text = LocationUtils.getCityName(location!!, this)
             weatherSummary.text = it.summary
             currentWeatherTemperature.text = "${it.temperature.roundToInt()}℃"
             currentApparentTemperature.text = "Feel like: ${it.apparentTemperature.roundToInt()}℃"
             when (it.icon) {
-                "clear-day" -> currentWeatherIcon.setImageDrawable(
-                    this.resources.getDrawable(
-                        R.drawable.ic_clear_day,
-                        null
+                "clear-day" -> {
+
+                    currentWeatherIcon.setImageDrawable(
+                        this.resources.getDrawable(
+                            R.drawable.ic_clear_day,
+                            null
+                        )
                     )
-                )
-                "clear-night" -> currentWeatherIcon.setImageDrawable(
-                    this.resources.getDrawable(
-                        R.drawable.ic_night_clear,
-                        null
+
+                    main_container.background =
+                        baseContext.resources.getDrawable(R.drawable.clear_day, null)
+                }
+                "clear-night" -> {
+                    currentWeatherIcon.setImageDrawable(
+                        this.resources.getDrawable(
+                            R.drawable.ic_night_clear,
+                            null
+                        )
                     )
-                )
-                "rain" -> currentWeatherIcon.setImageDrawable(
-                    this.resources.getDrawable(
-                        R.drawable.ic_rain,
-                        null
+
+                    main_container.background =
+                        baseContext.resources.getDrawable(R.drawable.clear_night, null)
+
+                }
+
+                "rain" -> {
+                    currentWeatherIcon.setImageDrawable(
+                        this.resources.getDrawable(
+                            R.drawable.ic_rain,
+                            null
+                        )
                     )
-                )
-                "snow" -> currentWeatherIcon.setImageDrawable(
-                    this.resources.getDrawable(
-                        R.drawable.ic_snow,
-                        null
+                    main_container.background =
+                        baseContext.resources.getDrawable(R.drawable.raining, null)
+                }
+                "snow" -> {
+                    currentWeatherIcon.setImageDrawable(
+                        this.resources.getDrawable(
+                            R.drawable.ic_snow,
+                            null
+                        )
                     )
-                )
+
+                }
                 "sleet" -> currentWeatherIcon.setImageDrawable(
                     this.resources.getDrawable(
                         R.drawable.ic_sleet,
@@ -118,24 +142,38 @@ class MainActivity : AppCompatActivity() {
                         null
                     )
                 )
-                "cloudy" -> currentWeatherIcon.setImageDrawable(
-                    this.resources.getDrawable(
-                        R.drawable.ic_cloudy,
-                        null
+                "cloudy" -> {
+                    currentWeatherIcon.setImageDrawable(
+                        this.resources.getDrawable(
+                            R.drawable.ic_cloudy,
+                            null
+                        )
                     )
-                )
-                "partly-cloudy-day" -> currentWeatherIcon.setImageDrawable(
-                    this.resources.getDrawable(
-                        R.drawable.ic_partly_cloudy,
-                        null
+                    main_container.background =
+                        baseContext.resources.getDrawable(R.drawable.cloudy, null)
+                }
+                "partly-cloudy-day" -> {
+                    currentWeatherIcon.setImageDrawable(
+                        this.resources.getDrawable(
+                            R.drawable.ic_partly_cloudy,
+                            null
+                        )
                     )
-                )
-                "partly-cloudy-night" -> currentWeatherIcon.setImageDrawable(
-                    this.resources.getDrawable(
-                        R.drawable.ic_night_partly_cloudy,
-                        null
+                    main_container.background =
+                        baseContext.resources.getDrawable(R.drawable.cloudy_day, null)
+                }
+                "partly-cloudy-night" -> {
+                    currentWeatherIcon.setImageDrawable(
+                        this.resources.getDrawable(
+                            R.drawable.ic_night_partly_cloudy,
+                            null
+                        )
                     )
-                )
+
+                    main_container.background =
+                        baseContext.resources.getDrawable(R.drawable.cloudy_night, null)
+                }
+
             }
         })
 
@@ -173,7 +211,18 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun requestPermission() {
-        ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), 1)
+        ActivityCompat.requestPermissions(
+            this,
+            arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+            1
+        )
+
+        ActivityCompat.requestPermissions(
+            this,
+            arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION),
+            2
+        )
+        ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.CAMERA), 3)
     }
 
 
