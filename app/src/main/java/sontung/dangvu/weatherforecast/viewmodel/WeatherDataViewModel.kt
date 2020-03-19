@@ -1,37 +1,62 @@
 package sontung.dangvu.weatherforecast.viewmodel
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.MutableLiveData
-import sontung.dangvu.weatherforecast.di.*
-import sontung.dangvu.weatherforecast.retrofit.ApiUtils
+import android.util.Log
+import androidx.lifecycle.ViewModel
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.observers.DisposableSingleObserver
+import io.reactivex.schedulers.Schedulers
+import sontung.dangvu.weatherforecast.model.weather.WeatherDataResult
+import sontung.dangvu.weatherforecast.repository.WeatherRepository
+import javax.inject.Inject
 
-class WeatherDataViewModel(application: Application) : AndroidViewModel(application) {
+class WeatherDataViewModel @Inject constructor(
+    private val weatherRepository: WeatherRepository
+) : ViewModel() {
 
-    val isDataLoading = MutableLiveData<Boolean>()
+    private val TAG = "WeatherDataViewModel"
 
-    val component = DaggerLocationComponent.builder()
-        .locationModule(LocationModule(application))
-        .build()
+    companion object {
+        private const val TAG = "WeatherDataViewModel"
+    }
 
-    val disposable = DaggerAppComponent
-        .builder().weatherModule(WeatherModule())
-        .build().provideCompositeDisposable()
+    private val compositeDisposable = CompositeDisposable()
 
-    val api = ApiUtils.getWeatherService()
-    val location = component.provideLocation()
-
-    val weatherRepository = DaggerDbComponent.builder()
-        .dbModule(DbModule(api, disposable, location))
-        .build()
-        .provideWeatherRepository()
+    init {
+        Log.d(TAG, "weatherRepo : $weatherRepository, disposable : $compositeDisposable")
+    }
 
     val weatherDetail = weatherRepository.weatherDataDetail
     val weatherResult = weatherRepository.weatherDataResult
 
     fun getData(){
-        weatherRepository.location = location
         weatherRepository.getDataFromApi()
+
+        compositeDisposable.add(
+            weatherRepository.getDataFromApi()
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeWith(object : DisposableSingleObserver<WeatherDataResult>() {
+                    override fun onSuccess(t: WeatherDataResult) {
+                        Log.d(TAG, "Success")
+                        Log.d(TAG, "$t")
+                        weatherDetail.value = t.currently
+                        weatherResult.value = t
+                    }
+
+                    override fun onError(e: Throwable) {
+                        Log.d(TAG, "Error")
+                        e.printStackTrace()
+                    }
+
+                })
+        )
+
+    }
+
+    override fun onCleared() {
+        compositeDisposable.clear()
+        super.onCleared()
     }
 
 }

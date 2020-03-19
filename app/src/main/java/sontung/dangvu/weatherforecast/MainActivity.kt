@@ -7,12 +7,12 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import sontung.dangvu.weatherforecast.di.*
 import sontung.dangvu.weatherforecast.model.weather.WeatherDataDetail
 import sontung.dangvu.weatherforecast.retrofit.ApiUtils
 import sontung.dangvu.weatherforecast.retrofit.WeatherAPI
@@ -20,6 +20,7 @@ import sontung.dangvu.weatherforecast.ui.adapter.WeatherDailyAdapter
 import sontung.dangvu.weatherforecast.ui.adapter.WeatherDataDetailAdapter
 import sontung.dangvu.weatherforecast.utils.LocationUtils
 import sontung.dangvu.weatherforecast.viewmodel.WeatherDataViewModel
+import javax.inject.Inject
 import kotlin.math.roundToInt
 
 private const val TAG = "MainActivity"
@@ -27,7 +28,9 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var weatherAPI: WeatherAPI
 
-    private val weatherViewModel : WeatherDataViewModel by viewModels()
+    @Inject
+    lateinit var weatherViewModel: WeatherDataViewModel
+
     private var location : Location? = null
 
 
@@ -52,11 +55,23 @@ class MainActivity : AppCompatActivity() {
             requestPermission()
         }
 
-        location = weatherViewModel.location
         weatherAPI = ApiUtils.getWeatherService()
+        location = LocationUtils.getLocation(this)
+
+        val component = DaggerAppComponent
+            .builder()
+            .weatherModule(WeatherModule(this.applicationContext))
+            .locationModule(LocationModule((this)))
+            .dbModule(DbModule(weatherAPI, location))
+            .viewModelModule(ViewModelModule(this))
+            .build()
+
+        component.inject(this)
+        //weatherViewModel = component.provideWeatherDataViewModel()
+
         weatherViewModel.weatherDetail.observe(this, Observer<WeatherDataDetail>{
             Log.d(TAG, "changed")
-            cityName.text = LocationUtils.getCityName(weatherViewModel.location!!, this)
+            cityName.text = LocationUtils.getCityName(location!!, this)
             weatherSummary.text = it.summary
             currentWeatherTemperature.text = "${it.temperature.roundToInt()}℃"
             currentApparentTemperature.text = "Feel like: ${it.apparentTemperature.roundToInt()}℃"

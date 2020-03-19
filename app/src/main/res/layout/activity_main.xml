@@ -18,6 +18,7 @@
             layout="@layout/current_weather_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            app:layout_constraintHorizontal_chainStyle="packed"
             app:layout_constraintTop_toTopOf="parent" />
 
         <androidx.recyclerview.widget.RecyclerView
