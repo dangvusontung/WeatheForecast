@@ -30,26 +30,8 @@ class WeatherDataViewModel @Inject constructor(
     val weatherResult = weatherRepository.weatherDataResult
 
     fun getData(){
-        weatherRepository.getDataFromApi()
-
         compositeDisposable.add(
             weatherRepository.getDataFromApi()
-                .subscribeOn(Schedulers.newThread())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeWith(object : DisposableSingleObserver<WeatherDataResult>() {
-                    override fun onSuccess(t: WeatherDataResult) {
-                        Log.d(TAG, "Success")
-                        Log.d(TAG, "$t")
-                        weatherDetail.value = t.currently
-                        weatherResult.value = t
-                    }
-
-                    override fun onError(e: Throwable) {
-                        Log.d(TAG, "Error")
-                        e.printStackTrace()
-                    }
-
-                })
         )
 
     }

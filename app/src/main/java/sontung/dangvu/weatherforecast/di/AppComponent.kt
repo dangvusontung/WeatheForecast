@@ -10,12 +10,11 @@ import sontung.dangvu.weatherforecast.viewmodel.WeatherDataViewModel
 import javax.inject.Singleton
 
 @Singleton
-@Component(modules = [DbModule::class, LocationModule::class, WeatherModule::class, ViewModelModule::class])
+@Component(modules = [DbModule::class, WeatherModule::class, ViewModelModule::class])
 interface AppComponent {
     fun provideCompositeDisposable() : CompositeDisposable
     fun provideApplication(): Context
     fun provideRepository(): WeatherRepository
-    fun provideLocation(): Location?
     fun provideWeatherDataViewModel(): WeatherDataViewModel
     fun inject(mainActivity: MainActivity)
 }

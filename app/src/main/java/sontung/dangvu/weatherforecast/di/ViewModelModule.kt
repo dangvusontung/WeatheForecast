@@ -1,6 +1,7 @@
 package sontung.dangvu.weatherforecast.di
 
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.ViewModelStoreOwner
 import dagger.Module
 import dagger.Provides

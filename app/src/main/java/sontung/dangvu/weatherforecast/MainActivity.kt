@@ -1,9 +1,12 @@
 package sontung.dangvu.weatherforecast
 
+import com.google.android.gms.location.*
+
 import android.Manifest
 import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Bundle
+import android.os.Looper
 import android.util.Log
 import android.widget.ImageView
 import android.widget.TextView
@@ -33,7 +36,7 @@ class MainActivity : AppCompatActivity() {
     @Inject
     lateinit var weatherViewModel: WeatherDataViewModel
 
-    private var location: Location? = null
+    private lateinit var appLocation: Location
 
 
     private lateinit var recyclerView: RecyclerView
@@ -48,6 +51,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var currentWeatherTemperature: TextView
     private lateinit var currentApparentTemperature: TextView
 
+    lateinit var fusedLocationProvider : FusedLocationProviderClient
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,25 +61,46 @@ class MainActivity : AppCompatActivity() {
             && checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED
         ) {
             requestPermission()
+        } else {
+            prepareForAction()
+        }
+    }
+    override fun onResume() {
+        super.onResume()
+
+    }
+
+    private fun prepareForAction() {
+        weatherAPI = ApiUtils.getWeatherService()
+
+        fusedLocationProvider = LocationServices.getFusedLocationProviderClient(this)
+
+        with(locationRequest) {
+            priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+            interval = 60000
+            fastestInterval = 5000
         }
 
-        weatherAPI = ApiUtils.getWeatherService()
-        location = LocationUtils.getLocation(this)
+        with(fusedLocationProvider) {
+            requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper())
+        }
 
+        initView()
+    }
+
+    private fun startAction() {
         val component = DaggerAppComponent
             .builder()
             .weatherModule(WeatherModule(this.applicationContext))
-            .locationModule(LocationModule((this)))
-            .dbModule(DbModule(weatherAPI, location))
+            .dbModule(DbModule(weatherAPI, appLocation))
             .viewModelModule(ViewModelModule(this))
             .build()
 
         component.inject(this)
-        //weatherViewModel = component.provideWeatherDataViewModel()
 
         weatherViewModel.weatherDetail.observe(this, Observer<WeatherDataDetail> {
             Log.d(TAG, "changed")
-            cityName.text = LocationUtils.getCityName(location!!, this)
+            cityName.text = LocationUtils.getCityName(appLocation, this)
             weatherSummary.text = it.summary
             currentWeatherTemperature.text = "${it.temperature.roundToInt()}℃"
             currentApparentTemperature.text = "Feel like: ${it.apparentTemperature.roundToInt()}℃"
@@ -182,28 +207,34 @@ class MainActivity : AppCompatActivity() {
             dailyAdapter.updateList(it.dailyWeatherData.dailyList)
         })
 
-        initView()
         loadData()
-
     }
 
     private fun initView() {
         recyclerView = findViewById(R.id.recyclerView)
-        recyclerView.layoutManager =
-            LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+
         weatherSummary = findViewById(R.id.weather_summary_textview)
         cityName = findViewById(R.id.weather_location_textView)
         currentWeatherIcon = findViewById(R.id.current_weather_icon)
         weatherAdapter = WeatherDataDetailAdapter(ArrayList(), this)
         currentWeatherTemperature = findViewById(R.id.current_weather_temperature)
         currentApparentTemperature = findViewById(R.id.current_apparent_temperature)
-        recyclerView.adapter = weatherAdapter
+
+
+        with(recyclerView) {
+            layoutManager = LinearLayoutManager(this.context, LinearLayoutManager.HORIZONTAL, false)
+            adapter = weatherAdapter
+        }
 
         dailyRecyclerView = findViewById(R.id.daily_recyclerView)
         dailyAdapter = WeatherDailyAdapter(ArrayList(), this)
-        dailyRecyclerView.layoutManager =
-            LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
-        dailyRecyclerView.adapter = dailyAdapter
+
+        with(dailyRecyclerView) {
+            layoutManager =
+                LinearLayoutManager(this.context, LinearLayoutManager.VERTICAL, false)
+            adapter = dailyAdapter
+        }
+
     }
 
     private fun loadData() {
@@ -222,8 +253,27 @@ class MainActivity : AppCompatActivity() {
             arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION),
             2
         )
-        ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.CAMERA), 3)
     }
 
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        when (requestCode) {
+            1-> prepareForAction()
+        }
+    }
+
+    private val locationRequest = LocationRequest.create()
+
+    private val locationCallback = object : LocationCallback() {
+        override fun onLocationResult(p0: LocationResult?) {
+            p0 ?: return
+            appLocation = p0.lastLocation
+            Log.d(TAG, "appLocation : ${appLocation.latitude}, ${appLocation.longitude}")
+            startAction()
+        }
+    }
 
 }

@@ -25,9 +25,5 @@ class CityRepository(private val context: Context, private val cityDao: CityDao)
         return LocationUtils.getCityName(latitude, longitude, context)
     }
 
-    fun getCoordinates(context: Context) : Location? {
-        return LocationUtils.getLocation(context)
-    }
-
 
 }

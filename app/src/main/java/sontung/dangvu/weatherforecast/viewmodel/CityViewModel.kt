@@ -13,8 +13,4 @@ class CityViewModel(application: Application) : AndroidViewModel(application) {
 
     val cityRepository = CityRepository(application, cityDao)
 
-    fun getLocation() : Location? {
-        return cityRepository.getCoordinates(getApplication())
-    }
-
 }
